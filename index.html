@@ -230,29 +230,17 @@ article[hidden] {
     Asesores · revisión y primer contacto
    </h1>
 <p>
-    Dinah Gómez · Remates bancarios · Actualización: 4 de noviembre de 2026
+    Dinah Gómez · Remates bancarios · Actualización del sistema: 5 de noviembre de 2026
    </p>
-<div class="stats"><span>262 enlaces WhatsApp</span><span>103 alta afinidad</span><span>126 media</span><span>35 baja</span><span>16 pendientes</span><span>43 duplicados detectados</span></div>
+<div class="stats" id="summary-affinity" aria-live="polite"></div>
+<div class="stats" id="summary-contact" aria-live="polite"></div>
+<div class="stats" id="summary-company" aria-live="polite"></div>
+
 </div>
 </header>
 <main>
-<div class="note">
-<b>
-    Cómo usarlo:
-   </b>
-   empieza por afinidad alta y pulsa «Abrir WhatsApp». Cada enlace contiene el mensaje aprobado. Revisa y envía desde tu teléfono. No se enviaron mensajes durante esta revisión.
-  </div>
-<p>
-<b>
-    Alcance:
-   </b>
-   1181 postulaciones visibles contrastadas; 237 posibles nuevos casos revisados. El portal mostraba 1199 postulaciones: 18 no quedaron recuperadas en las páginas visibles. Los registros anteriores acreditan información compartida o enlaces preparados, no envíos reales.
-  </p>
-<p>
-   La afinidad es una valoración inicial del CV para ventas de remates bancarios: prospección, cartera, negociación y cierres. En todos los casos falta confirmar interés, resultados, disponibilidad y aceptación de 100% comisiones sin sueldo base. Baja afinidad no equivale a rechazo automático.
-  </p>
-<html><body><div class="note"><b>Seguimiento individual:</b> En cada ficha puedes indicar si ya contactaste a la persona, si ya pertenece a la empresa y escribir notas. Los cambios se guardan automáticamente en este navegador. <b>Importante:</b> no se sincronizan entre computadoras automáticamente. Usa «Guardar Johnson actualizado (.html)» para descargar el HTML con los estados y notas incorporados y luego reemplazar el archivo en GitHub. También puedes exportar/importar respaldo JSON.</div><div class="tracker-actions"><button id="save-html" style="background:#137a49;color:white;font-weight:700" type="button">Guardar Johnson actualizado (.html)</button><button id="export-followup" type="button">Exportar respaldo de seguimiento (.json)</button><label for="import-followup">Importar respaldo (.json)<input accept=".json,application/json" id="import-followup" type="file"/></label></div><p aria-live="polite" class="tracker-status" id="tracker-status"></p></body></html><div class="filters">
-<input aria-label="Buscar candidato" id="q" placeholder="Buscar nombre…"/>
+<div class="tracker-actions"><button id="export-excel-contacted" type="button">Excel de contactados</button><button id="export-excel-pending" type="button">Excel de no contactados</button><button id="export-excel" type="button">Excel de todos</button></div><p aria-live="polite" class="tracker-status" id="tracker-status"></p><div class="filters">
+<select id="contact-filter" aria-label="Filtrar por contacto"><option value="all">Todos</option><option value="contacted">Contactados</option><option value="pending">Faltan por contactar</option></select><input aria-label="Buscar candidato" id="q" placeholder="Buscar nombre…"/>
 <button data-cat="Todos">
     Todos
    </button>
@@ -13765,17 +13753,99 @@ function record(c){const id=c.dataset.id,d=initial(c),r={...d,...(local[id]||{})
  return r;
 }
 function render(c){const r=record(c);for(const f of fields){const el=c.querySelector('.'+f);if(el&&document.activeElement!==el)el.value=r[f]||''}const m=c.querySelector('.saved');if(m)m.textContent=r['contact-state']||r['candidate-notes']?'Seguimiento registrado':'Sin cambios registrados'}
-let category='Todos';function filter(){const q=tokens(document.getElementById('q')?.value||'');let n=0;for(const c of cards){const hay=norm([c.querySelector('h2')?.textContent,c.querySelector('.phone')?.textContent].join(' '));const yes=(category==='Todos'||c.dataset.cat===category)&&q.every(t=>hay.includes(t));c.hidden=!yes;if(yes)n++}const sh=document.getElementById('shown');if(sh)sh.textContent=n+' candidatos en esta vista';document.querySelectorAll('button[data-cat]').forEach(b=>b.classList.toggle('active',b.dataset.cat===category))}
+let category='Todos';function filter(){const q=tokens(document.getElementById('q')?.value||'');let n=0;for(const c of cards){const hay=norm([c.querySelector('h2')?.textContent,c.querySelector('.phone')?.textContent].join(' '));const state=c.querySelector('.contact-state')?.value||'';const cf=document.getElementById('contact-filter').value;const matches=cf==='all'||(cf==='contacted'&&hasContact(state))||(cf==='pending'&&!hasContact(state))||cf===state;const yes=matches&&(category==='Todos'||c.dataset.cat===category)&&q.every(t=>hay.includes(t));c.hidden=!yes;if(yes)n++}const sh=document.getElementById('shown');if(sh)sh.textContent=n+' candidatos en esta vista';document.querySelectorAll('button[data-cat]').forEach(b=>b.classList.toggle('active',b.dataset.cat===category))}
 document.getElementById('q')?.addEventListener('input',filter);document.querySelectorAll('button[data-cat]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.cat;filter()}));
 const overlay=document.createElement('div');overlay.id='firebase-access';overlay.style.cssText='position:fixed;z-index:9999;inset:0;background:#0f172af5;display:flex;align-items:center;justify-content:center;font:16px Arial,sans-serif';overlay.innerHTML='<form id="firebase-login" style="background:white;color:#111827;padding:28px;border-radius:12px;max-width:390px;width:90%;box-sizing:border-box"><h2>Acceso a asesores</h2><p>Correo y contraseña de Firebase</p><label>Correo<input id="login-email" type="email" required autocomplete="username" style="display:block;width:100%;padding:10px;box-sizing:border-box;margin:7px 0 14px"></label><label>Contraseña<input id="login-password" type="password" required autocomplete="current-password" style="display:block;width:100%;padding:10px;box-sizing:border-box;margin:7px 0 14px"></label><button type="submit" style="padding:12px;width:100%">Entrar</button><p id="login-error" role="alert" style="color:#b91c1c"></p></form>';document.body.appendChild(overlay);
 function download(content,name,type){const u=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
 function persist(){try{localStorage.setItem(key,JSON.stringify(local))}catch{}}
-for(const c of cards){render(c);for(const f of fields){const el=c.querySelector('.'+f);if(!el)continue;el.addEventListener('change',async()=>{const id=c.dataset.id,value=el.value;local[id]={...(local[id]||{}),[f]:value};persist();const marker=c.querySelector('.saved');marker.textContent='Guardando...';if(!connected){marker.textContent='Pendiente de conexión';return}try{await store.setDoc(store.doc(db,'asesores',id),{[f]:value},{merge:true});marker.textContent='Guardado en Firebase'}catch(e){marker.textContent='Error al guardar: '+e.message}})}}
-document.getElementById('export-followup')?.addEventListener('click',()=>{const records={};cards.forEach(c=>records[c.dataset.id]=record(c));download(JSON.stringify({format:'indeed-dinah-seguimiento-v1',exportedAt:new Date().toISOString(),records},null,2),'respaldo_seguimiento_indeed.json','application/json')});
-document.getElementById('save-html')?.addEventListener('click',()=>{const clone=document.documentElement.cloneNode(true);clone.querySelector('#firebase-access')?.remove();clone.querySelectorAll('article[data-id]').forEach((c,i)=>{const r=record(cards[i]);c.dataset.initialContact=r['contact-state']||'';c.dataset.initialCompany=r['company-state']||'';c.dataset.initialNotes=r['candidate-notes']||''});download('<!DOCTYPE html>\n'+clone.outerHTML,'asesores_indeed_actualizado.html','text/html;charset=utf-8')});
-document.getElementById('import-followup')?.addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const o=JSON.parse(await f.text());if(o.format!=='indeed-dinah-seguimiento-v1'||!o.records)throw Error('Formato inválido');if(!confirm('¿Importar respaldo y actualizar registros?'))return;let count=0;for(const c of cards){const r=o.records[c.dataset.id];if(!r)continue;const clean={};for(const k of fields)if(typeof r[k]==='string')clean[k]=r[k];if(connected)await store.setDoc(store.doc(db,'asesores',c.dataset.id),clean,{merge:true});else local[c.dataset.id]={...(local[c.dataset.id]||{}),...clean};count++}persist();cards.forEach(render);say(count+' registros importados')}catch(ex){say('Error al importar: '+ex.message)}finally{e.target.value=''}});
+for(const c of cards){render(c);for(const f of fields){const el=c.querySelector('.'+f);if(!el)continue;el.addEventListener('change',async()=>{const id=c.dataset.id,value=el.value;local[id]={...(local[id]||{}),[f]:value};persist();updateSummary();filter();const marker=c.querySelector('.saved');marker.textContent='Guardando...';if(!connected){marker.textContent='Pendiente de conexión';return}try{await store.setDoc(store.doc(db,'asesores',id),{[f]:value},{merge:true});marker.textContent='Guardado en Firebase'}catch(e){marker.textContent='Error al guardar: '+e.message}})}}
 async function connect(){try{const [appmod,authmod,storemod]=await Promise.all([import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')]);store=storemod;const app=appmod.initializeApp(cfg);auth=authmod.getAuth(app);db=storemod.getFirestore(app);overlay.querySelector('form').addEventListener('submit',async e=>{e.preventDefault();const error=document.getElementById('login-error');error.textContent='Conectando...';try{await authmod.signInWithEmailAndPassword(auth,document.getElementById('login-email').value,document.getElementById('login-password').value);error.textContent=''}catch(err){error.textContent=err.message}});
- authmod.onAuthStateChanged(auth,user=>{if(unsub){unsub();unsub=null}if(!user){connected=false;overlay.style.display='flex';say('Inicia sesión para sincronizar');return}overlay.style.display='none';connected=true;say('Conectado a Firebase. Sincronizando...');unsub=storemod.onSnapshot(storemod.collection(db,'asesores'),async snap=>{remote={};snap.forEach(d=>remote[d.id]=d.data());cards.forEach(render);say('Firebase conectado: '+snap.size+' registros en la nube.');if(bootstrapping)return;const missing=cards.filter(c=>!snap.docs.some(d=>d.id===c.dataset.id));const corrections=cards.filter(c=>{const r=remote[c.dataset.id];return r&&c.dataset.initialContact==='Contactado'&&(!r['contact-state']||r['contact-state']==='No contactado')});if(!missing.length&&!corrections.length)return;bootstrapping=true;try{const tasks=[...missing.map(c=>({c,kind:'missing'})),...corrections.map(c=>({c,kind:'fix'}))];for(let i=0;i<tasks.length;i+=400){const batch=storemod.writeBatch(db);for(const t of tasks.slice(i,i+400)){const ref=storemod.doc(db,'asesores',t.c.dataset.id);if(t.kind==='missing')batch.set(ref,record(t.c));else batch.update(ref,{'contact-state':'Contactado','candidate-notes':record(t.c)['candidate-notes']})}await batch.commit()}say('Firebase: '+cards.length+' fichas sincronizadas.')}catch(e){say('Error al sincronizar: '+e.message)}finally{bootstrapping=false}},err=>say('Error Firebase: '+err.message))});
+ authmod.onAuthStateChanged(auth,user=>{if(unsub){unsub();unsub=null}if(!user){connected=false;overlay.style.display='flex';say('Inicia sesión para sincronizar');return}overlay.style.display='none';connected=true;say('Conectado a Firebase. Sincronizando...');unsub=storemod.onSnapshot(storemod.collection(db,'asesores'),async snap=>{remote={};snap.forEach(d=>remote[d.id]=d.data());cards.forEach(render);updateSummary();filter();say('Firebase conectado: '+snap.size+' registros en la nube.');if(bootstrapping)return;const missing=cards.filter(c=>!snap.docs.some(d=>d.id===c.dataset.id));const corrections=cards.filter(c=>{const r=remote[c.dataset.id];return r&&c.dataset.initialContact==='Contactado'&&(!r['contact-state']||r['contact-state']==='No contactado')});if(!missing.length&&!corrections.length)return;bootstrapping=true;try{const tasks=[...missing.map(c=>({c,kind:'missing'})),...corrections.map(c=>({c,kind:'fix'}))];for(let i=0;i<tasks.length;i+=400){const batch=storemod.writeBatch(db);for(const t of tasks.slice(i,i+400)){const ref=storemod.doc(db,'asesores',t.c.dataset.id);if(t.kind==='missing')batch.set(ref,record(t.c));else batch.update(ref,{'contact-state':'Contactado','candidate-notes':record(t.c)['candidate-notes']})}await batch.commit()}say('Firebase: '+cards.length+' fichas sincronizadas.')}catch(e){say('Error al sincronizar: '+e.message)}finally{bootstrapping=false}},err=>say('Error Firebase: '+err.message))});
  }catch(e){document.getElementById('login-error').textContent='No se pudo cargar Firebase: '+e.message;say('Error de conexión: '+e.message)}}
-filter();connect();
+function hasContact(value) {
+  return ['Contactado', 'Respondió', 'Sin respuesta', 'No interesado'].includes(value);
+}
+function currentRows(selection = cards) {
+  return selection.map(card => ({
+    name: card.querySelector('h2')?.textContent.trim() || '',
+    phone: card.querySelector('.phone')?.textContent.trim() || '',
+    category: card.dataset.cat || '',
+    contact: card.querySelector('.contact-state')?.value || 'Sin registrar',
+    company: card.querySelector('.company-state')?.value || 'Sin confirmar',
+    notes: card.querySelector('.candidate-notes')?.value || '',
+    whatsapp: card.querySelector('a[href*="wa.me/"]')?.href || '',
+    profile: card.querySelector('p:not(.phone)')?.textContent.trim() || '',
+    id: card.dataset.id
+  }));
+}
+function summaryRows(rows) {
+  const contacted = rows.filter(row => hasContact(row.contact)).length;
+  return [
+    ['Total de fichas', rows.length],
+    ...[['Alto','Alta afinidad'],['Medio','Afinidad media'],['Bajo','Afinidad baja'],['Pendiente','Datos por confirmar'],['Duplicado','Duplicados detectados']].map(([key,label]) => [label, rows.filter(row => row.category === key).length]),
+    ['Contactados', contacted],
+    ['Faltan por contactar', rows.length - contacted],
+    ['Con enlace WhatsApp',rows.filter(row => row.whatsapp).length],
+    ...[['Ya pertenece','Incorporados a la empresa'],['No incorporado','No incorporados'],['En proceso','En proceso de incorporación'],['Baja','Bajas'],['Sin confirmar','Incorporación sin confirmar']].map(([state,label]) => [label,rows.filter(row => row.company === state).length])
+  ];
+}
+function updateSummary() {
+  const rows = summaryRows(currentRows());
+  const fill = (id, values) => {
+    const host = document.getElementById(id);
+    host.replaceChildren(...values.map(([label,count]) => {
+      const span = document.createElement('span');
+      span.textContent = `${label}: ${count}`;
+      return span;
+    }));
+  };
+  fill('summary-affinity',[rows[0],rows[8],...rows.slice(1,6)]);
+  fill('summary-contact',rows.slice(6,8));
+  fill('summary-company',rows.slice(9));
+}
+document.getElementById('contact-filter').addEventListener('change',filter);
+
+// Portable XLSX export: OOXML with inline strings preserves phones and prevents
+// notes beginning with '=' from becoming executable spreadsheet formulas.
+function excelBytes(sheets) {
+  const enc = new TextEncoder();
+  const xml = value => String(value ?? '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const col = index => { let result=''; for(index++;index;index=Math.floor((index-1)/26))result=String.fromCharCode(65+(index-1)%26)+result;return result; };
+  const files = {};
+  files['[Content_Types].xml'] = `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`;
+  files['_rels/.rels'] = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  files['xl/workbook.xml'] = `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s,i)=>`<sheet name="${xml(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`;
+  files['xl/_rels/workbook.xml.rels'] = `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}</Relationships>`;
+  sheets.forEach((sheet,i)=> {
+    files[`xl/worksheets/sheet${i+1}.xml`] = `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${sheet.widths.map((w,j)=>`<col min="${j+1}" max="${j+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${sheet.rows.map((row,r)=>`<row r="${r+1}">${row.map((v,c)=>typeof v==='number'?`<c r="${col(c)}${r+1}"><v>${v}</v></c>`:`<c r="${col(c)}${r+1}" t="inlineStr"><is><t xml:space="preserve">${xml(v)}</t></is></c>`).join('')}</row>`).join('')}</sheetData>${sheet.filter?`<autoFilter ref="A1:${col(sheet.rows[0].length-1)}${sheet.rows.length}"/>`:''}</worksheet>`;
+  });
+  const parts=[], central=[]; let offset=0, size=0;
+  const crc32 = bytes => {let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return (crc^0xffffffff)>>>0;};
+  const header = size => {const data=new Uint8Array(size);return [data,new DataView(data.buffer)];};
+  for(const [path,source] of Object.entries(files)) {
+    const name=enc.encode(path), data=enc.encode(source), crc=crc32(data);
+    const [local,v]=header(30);v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,name.length,true);
+    parts.push(local,name,data);
+    const [directory,d]=header(46);d.setUint32(0,0x02014b50,true);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint32(16,crc,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);d.setUint16(28,name.length,true);d.setUint32(42,offset,true);
+    central.push(directory,name);size+=46+name.length;offset+=30+name.length+data.length;
+  }
+  const [end,e]=header(22);e.setUint32(0,0x06054b50,true);e.setUint16(8,Object.keys(files).length,true);e.setUint16(10,Object.keys(files).length,true);e.setUint32(12,size,true);e.setUint32(16,offset,true);
+  const bytes=new Uint8Array(offset+size+22);let at=0;for(const part of [...parts,...central,end]){bytes.set(part,at);at+=part.length;}return bytes;
+}
+function exportExcel(group = 'all') {
+  const allRows = currentRows(cards);
+  const rows = allRows.filter(row => group === 'all' || (group === 'contacted' ? hasContact(row.contact) : !hasContact(row.contact)));
+  const scope = group === 'contacted' ? 'Contactados' : group === 'pending' ? 'No contactados' : 'Todos';
+  const sheets=[
+    {name:'Resumen',widths:[36,48],rows:[['Resumen de seguimiento','Cantidad / detalle'],...summaryRows(rows),['Descargado',new Date().toLocaleString('es-MX')],['Listado',scope],['Incluye duplicados','Sí; cada fila corresponde a una ficha']]},
+    {name:'Candidatos',widths:[36,22,20,24,22,25,70,45,70,50],filter:true,rows:[['Nombre','Teléfono','Clasificación','Seguimiento','Estado de contacto','Situación en la empresa','Observaciones','Enlace WhatsApp','Perfil','ID'],...rows.map(row=>[row.name,row.phone,row.category==='Pendiente'?'Datos por confirmar':row.category,hasContact(row.contact)?'Contactado':'Falta contactar',row.contact==='Sin registrar'?'Falta contactar':row.contact,row.company,row.notes,row.whatsapp,row.profile,row.id])]}
+  ];
+  download(excelBytes(sheets),`asesores_${scope.toLowerCase().replaceAll(' ','_')}_${new Date().toISOString().slice(0,10)}.xlsx`,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+document.getElementById('export-excel').addEventListener('click',()=>exportExcel('all'));
+document.getElementById('export-excel-contacted').addEventListener('click',()=>exportExcel('contacted'));
+document.getElementById('export-excel-pending').addEventListener('click',()=>exportExcel('pending'));
+
+
+updateSummary();filter();connect();
 </script></html>
